@@ -1,3 +1,5 @@
+# This file is purely for testing designs & implementations of new dash ideas
+
 from dash import Dash, html, dcc, Input, Output, State, callback
 import dash_bootstrap_components as dbc
 import plotly.io as pio

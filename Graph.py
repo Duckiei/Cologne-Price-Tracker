@@ -601,10 +601,12 @@ def viewNewCologne(selectedCologneName, tab):
     Output("livePriceCard", "children", allow_duplicate=True),
     Output("liveQuantityCard", "children", allow_duplicate=True),
     Input("addCologneButton", "n_clicks"),
+    State("graphChoices", "value"),
+    State("graphTabs", "value"),
     State("addCologneInput", "value"),
     prevent_initial_call=True,
 )
-def addCologne(clicks, url):
+def addCologne(clicks, currentlyViewedCologne, tab, url):
     with open("fragranceBuy-Sites.txt", "a+") as file:
         # See if we can even access that url
         isValid = Helpers.urlValidifier(url)
@@ -614,16 +616,51 @@ def addCologne(clicks, url):
 
         newtables = Database.getTables()
 
+        # Currently selected data (To change nothing if error occurs)
+        graphFigure, description, img, value, url2, priceCard, quantityCard = (
+            viewNewCologne(currentlyViewedCologne, tab)
+        )
+
         if not isValid:
-            return ("INVALID: Unreachable URL, Please Retry..."), newtables
+            return (
+                ("INVALID: Unreachable URL, Please Retry..."),
+                newtables,
+                graphFigure,
+                description,
+                img,
+                value,
+                url2,
+                priceCard,
+                quantityCard,
+            )
 
         elif not (str(url).startswith("https://fragrancebuy.ca/products/")):
             return (
-                "INVALID: The URL you have entered does not navigate to a fragrancebuy product..."
-            ), newtables
+                (
+                    "INVALID: The URL you have entered does not navigate to a fragrancebuy product..."
+                ),
+                newtables,
+                graphFigure,
+                description,
+                img,
+                value,
+                url2,
+                priceCard,
+                quantityCard,
+            )
 
         elif url in file:
-            return ("INVALID: That product is already being tracked..."), newtables
+            return (
+                ("INVALID: That product is already being tracked..."),
+                newtables,
+                graphFigure,
+                description,
+                img,
+                value,
+                url2,
+                priceCard,
+                quantityCard,
+            )
 
         else:
             file.write("\n" + url)

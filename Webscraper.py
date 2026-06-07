@@ -4,7 +4,7 @@ import Helpers
 import Database
 import Notifications
 
-# ------------------- MAIN PROGRAM -------------------#
+# ------------------- MAIN PROGRAM & FUNCTIONS -------------------#
 scraper = cloudscraper.create_scraper()
 
 
@@ -71,7 +71,7 @@ def scrapeAll(scraper=scraper):
                 # Add scraped data to database
                 Database.setDB(title, current_price, quantity, fragBuyURL.strip())
 
-    print("Finished Scraping ALL links.")
+    print("Finished scraping all links.")
     scraper.close()
 
 
@@ -88,7 +88,7 @@ def scrapeOne(fragBuyURL, scraper=scraper):
     # Add those data points to the table of the specific cologne
     Database.setDB(title, current_price, quantity, fragBuyURL)
 
-    print("Done Scraping One")
+    print("Finished scraping single link.")
     scraper.close()
 
 
