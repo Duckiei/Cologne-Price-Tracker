@@ -157,7 +157,7 @@ async def add(ctx, *, urls):
 
             with open("fragranceBuy-Sites.txt", "a") as file:
                 for cologne in toTrack:
-                    file.write(cologne + "\n")
+                    file.write("\n" + cologne)
                     Webscraper.scrapeOne(cologne)
 
             await ctx.channel.send("Scraped multiple Links")

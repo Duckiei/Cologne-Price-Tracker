@@ -9,63 +9,67 @@ scraper = cloudscraper.create_scraper()
 
 
 # Scrape data from all links in .txt file
-def scrapeAll(fragBuyURL, scraper=scraper):
+def scrapeAll(scraper=scraper):
     with open("fragranceBuy-Sites.txt", "r") as file:
         # Read in every "https://fragrancebuy.ca/products/" link from the .txt file
-        for link in file:
-            response, location = findDataLocation(fragBuyURL, scraper=scraper)
+        for fragBuyURL in file:
+            if fragBuyURL.startswith("https://fragrancebuy.ca/products/"):
+                response, location = findDataLocation(fragBuyURL, scraper=scraper)
 
-            # Scrape all of the data required
-            title = str(location["title"])
-            current_price = float(location["price"])
-            quantity = int(location["inventory_quantity"])
-            img = response["product"]["image"]["src"]
+                if response is None or location is None:
+                    continue
 
-            print(title)
+                # Scrape all of the data required
+                title = str(location["title"])
+                current_price = float(location["price"])
+                quantity = int(location["inventory_quantity"])
+                img = response["product"]["image"]["src"]
 
-            # Find last price and quantity in database
-            oldPrice = Database.getLatestPrice(title=title)
-            oldQuantity = Database.getLatestQuantity(title=title)
+                print(title)
 
-            # Send notification for changes in price and quantity (if applicable)
-            if current_price > oldPrice:
-                # Notify User that Price has increased
-                Notifications.priceIncrease(
-                    title=title,
-                    newPrice=current_price,
-                    oldPrice=oldPrice,
-                    imgLink=img,
-                    productLink=link.strip(),
-                )
+                # Find last price and quantity in database
+                oldPrice = Database.getLatestPrice(title=title)
+                oldQuantity = Database.getLatestQuantity(title=title)
 
-            elif current_price < oldPrice:
-                Notifications.priceDecrease(
-                    title=title,
-                    newPrice=current_price,
-                    oldPrice=oldPrice,
-                    imgLink=img,
-                    productLink=link.strip(),
-                )
+                # Send notification for changes in price and quantity (if applicable)
+                if current_price > oldPrice:
+                    # Notify User that Price has increased
+                    Notifications.priceIncrease(
+                        title=title,
+                        newPrice=current_price,
+                        oldPrice=oldPrice,
+                        imgLink=img,
+                        productLink=fragBuyURL.strip(),
+                    )
 
-            if quantity > oldQuantity:
-                Notifications.quantityIncrease(
-                    title=title,
-                    newQuantity=quantity,
-                    oldQuantity=oldQuantity,
-                    imgLink=img,
-                    productLink=link.strip(),
-                )
-            elif quantity < oldQuantity:
-                Notifications.quantityDecrease(
-                    title=title,
-                    newQuantity=quantity,
-                    oldQuantity=oldQuantity,
-                    imgLink=img,
-                    productLink=link.strip(),
-                )
+                elif current_price < oldPrice:
+                    Notifications.priceDecrease(
+                        title=title,
+                        newPrice=current_price,
+                        oldPrice=oldPrice,
+                        imgLink=img,
+                        productLink=fragBuyURL.strip(),
+                    )
 
-            # Add scraped data to database
-            Database.setDB(title, current_price, quantity, link.strip())
+                if quantity > oldQuantity:
+                    Notifications.quantityIncrease(
+                        title=title,
+                        newQuantity=quantity,
+                        oldQuantity=oldQuantity,
+                        imgLink=img,
+                        productLink=fragBuyURL.strip(),
+                    )
+                elif quantity < oldQuantity:
+                    Notifications.quantityDecrease(
+                        title=title,
+                        newQuantity=quantity,
+                        oldQuantity=oldQuantity,
+                        imgLink=img,
+                        productLink=fragBuyURL.strip(),
+                    )
+
+                # Add scraped data to database
+                Database.setDB(title, current_price, quantity, fragBuyURL.strip())
 
     print("Finished Scraping ALL links.")
     scraper.close()
@@ -111,42 +115,34 @@ def scrapeLiveData(fragBuyURL, scraper=scraper):
 
 
 def findDataLocation(url, scraper=scraper):
-    if url.startswith("https://fragrancebuy.ca/products/"):
-        # Parse the url to get the json and specific variant ID (Distinguish between options)
-        fragBuyJSONURL, variantID = Helpers.parseUrl(url.strip())
+    # Parse the url to get the json and specific variant ID (Distinguish between options)
+    fragBuyJSONURL, variantID = Helpers.parseUrl(url.strip())
 
-        response = scraper.get(fragBuyJSONURL)
+    response = scraper.get(fragBuyJSONURL)
 
-        # If the site is able to be accessed, then scrape, otherwise skip it
-        if response.status_code == 200:
-            # Convert site contents to .json format to access data
-            response = response.json()
+    # If the site is able to be accessed, then scrape, otherwise skip it
+    if response.status_code == 200:
+        # Convert site contents to .json format to access data
+        response = response.json()
 
-            # Access the list that contains all the variants in the json file
-            variants = response["product"]["variants"]
+        # Access the list that contains all the variants in the json file
+        variants = response["product"]["variants"]
 
-            # No variant ID = Single variant in the list (access it directly)
-            if variantID is None:
-                location = response["product"]["variants"][0]
+        # No variant ID = Single variant in the list (access it directly)
+        if variantID is None:
+            location = response["product"]["variants"][0]
 
-            # If there is a variant ID, iterate through all the variants to match up ID to find right one
-            else:
-                for variant in variants:
-                    if variant["id"] == variantID:
-                        location = variant
-                        break
+        # If there is a variant ID, iterate through all the variants to match up ID to find right one
         else:
-            print(f'Unable to scrape data from: "{fragBuyJSONURL}"')
-            print(f'Response code: "{response.status_code}"')
-
-    # Message if program can't access site
+            for variant in variants:
+                if variant["id"] == variantID:
+                    location = variant
+                    break
+        return response, location
     else:
-        print(f'Unable to reach site: "{url}".')
-        print(
-            f'The provided link does not lead to a "https://fragrancebuy.ca/products/" webpage.'
-        )
-
-    return response, location
+        print(f'Unable to scrape data from: "{fragBuyJSONURL}"')
+        print(f'Response code: "{response.status_code}"')
+        return None, None
 
 
 if __name__ == "__main__":
