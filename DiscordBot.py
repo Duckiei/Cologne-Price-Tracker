@@ -155,13 +155,18 @@ async def add(ctx, *, urls):
         if " " in str(urls):
             toTrack = str(urls).split(" ")
 
-            for cologne in toTrack:
-                Webscraper.scrapeOne(cologne)
+            with open("fragranceBuy-Sites.txt", "a") as file:
+                for cologne in toTrack:
+                    file.write(cologne + "\n")
+                    Webscraper.scrapeOne(cologne)
 
             await ctx.channel.send("Scraped multiple Links")
 
         else:
-            Webscraper.scrapeOne(urls)
+            with open("fragranceBuy-Sites.txt", "a") as file:
+                file.write("\n" + urls)
+                Webscraper.scrapeOne(urls)
+
             await ctx.channel.send("Scraped Single Link")
 
     else:
