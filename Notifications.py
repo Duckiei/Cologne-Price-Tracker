@@ -10,7 +10,7 @@ webhook = SyncWebhook.from_url(webhookLink)
 botUsername = "cologne-bot"
 
 # All ID's necessary to ping specific users / roles
-userPing = "<@578669410378711066> <@714646955380441148> <@546848918160539651>"  # User ID for Me, Rashad, Aatmayan
+userPing = "<@578669410378711066> <@714646955380441148> <@546848918160539651>"  # User ID Me, Rashad, Aatmayan
 pIncreasePing = "<@&1512544144910975056>"  # Role ID for price increase role
 pDecreasePing = "<@&1512544292323983420>"  # Price decrease role
 qIncreasePing = "<@&1512544384132845638>"  # Quantity increase role

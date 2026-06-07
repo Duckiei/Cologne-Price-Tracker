@@ -1,3 +1,4 @@
+# ------------------- IMPORT STATEMENTS -------------------#
 import plotly.express as px
 import Database
 from dash import Dash, html, dcc, Input, Output, State, callback
@@ -6,10 +7,7 @@ import plotly.io as pio
 import Helpers
 import Webscraper
 
-# ---------------------------------------------------------------------#
-# TODO:
-#   Stop storing img in the sql Database, instead live scrape it
-# ---------------------------------------------------------------------#
+# ------------------- INITIALIZING VARIABLES -------------------#
 # Set table[0] as default
 tables = Database.getTables()
 tables.sort()
@@ -17,10 +15,12 @@ pdDF = Database.getPriceDateDF(tables[0])
 qdDF = Database.getQuantityDateDF(tables[0])
 app = Dash(external_stylesheets=[dbc.themes.SANDSTONE])
 
-# Editing Dash app layout
+
+# ------------------- EDITING THE DASHBOARD LAYOUT -------------------#
+
 app.layout = dbc.Container(
     [
-        # FIRST ROW
+        # Title
         dbc.Row(
             children=[
                 html.H1(
@@ -29,24 +29,28 @@ app.layout = dbc.Container(
                 ),
             ]
         ),
-        # SECOND ROW
+        # Second Row (Everything under the title)
         dbc.Row(
             children=[
-                # Left Side
+                # Everything on the left side
                 dbc.Col(
                     children=[
+                        # Above
                         dbc.Row(
                             [
                                 dbc.Col(
                                     [
+                                        # Left side column title
                                         html.H2(
                                             "Tracked Fragrances",
                                             className="mt-3 mb-3 bg-primary bg-opacity-75 text-light py-1 text-decoration-underline",
                                         ),
+                                        # Search bar
                                         dbc.Input(
                                             placeholder="🔍︎ Search...",
                                             id="graphChoicesSearchBar",
                                         ),
+                                        # Colognes scrolldown selection menu
                                         dcc.RadioItems(
                                             options=tables,
                                             value=tables[0],
@@ -75,6 +79,7 @@ app.layout = dbc.Container(
                             [
                                 dbc.Col(
                                     [
+                                        # Add cologne URL input box
                                         dcc.Input(
                                             id="addCologneInput",
                                             type="text",
@@ -83,11 +88,12 @@ app.layout = dbc.Container(
                                         )
                                     ],
                                     width="12",
-                                ),  # Button Input
+                                ),
                                 dbc.Row(
                                     [
                                         dbc.Col(
                                             [
+                                                # Add new cologne button
                                                 dbc.Button(
                                                     "Add Cologne",
                                                     id="addCologneButton",
@@ -98,6 +104,7 @@ app.layout = dbc.Container(
                                         ),
                                         dbc.Col(
                                             [
+                                                # Remove currently viewed cologne button
                                                 dbc.Button(
                                                     "Remove Cologne",
                                                     id="removeCologneButton",
@@ -107,6 +114,7 @@ app.layout = dbc.Container(
                                             ],
                                             width="auto",
                                         ),
+                                        #!!Might Remove
                                         dbc.Col(
                                             [html.Div(id="addCologneMessage")],
                                             width="auto",
@@ -120,34 +128,36 @@ app.layout = dbc.Container(
                     ],
                     width=3,
                 ),
-                # Right Side
+                # Everything on the right side
                 dbc.Col(
                     children=[
-                        # Descriptor and image
                         dbc.Row(
                             children=[
-                                # Rightish one
                                 dbc.Col(
                                     children=[
+                                        # Title of this section (large font)
                                         html.H2(
                                             "Description",
                                             className="bg-primary bg-opacity-75 text-light py-1 text-decoration-underline w-auto",
                                         ),
+                                        # Name of product (smaller font)
                                         html.H4(
                                             id="Description-ProductName",
                                         ),
+                                        # Actual description of the product
                                         html.H5(id="description"),
+                                        # Anchor link to product page
                                         html.A(
                                             "Product Page",
                                             id="Description-URL",
                                             target="_blank",
                                             className="text-primary",
                                         ),
-                                        # Live Price
                                         dbc.Row(
                                             children=[
                                                 dbc.Col(
                                                     [
+                                                        # Card to display live price of product
                                                         dbc.Card(
                                                             style={"width": "16rem"},
                                                             id="livePriceCard",
@@ -155,9 +165,9 @@ app.layout = dbc.Container(
                                                     ],
                                                     width="auto",
                                                 ),
-                                                # Live Quantity
                                                 dbc.Col(
                                                     [
+                                                        # Card to display live quantity of product
                                                         dbc.Card(
                                                             style={"width": "16rem"},
                                                             id="liveQuantityCard",
@@ -171,9 +181,10 @@ app.layout = dbc.Container(
                                     ],
                                     width=7,
                                 ),
-                                # Leftish one
+                                # Right side of the description box
                                 dbc.Col(
                                     children=[
+                                        # Image of the selected cologne
                                         html.Img(
                                             id="productImage",
                                             style={
@@ -189,16 +200,20 @@ app.layout = dbc.Container(
                             ],
                             className="align-items-center border border-3",
                         ),
+                        # Bottom of the right side of the page
                         dbc.Row(
                             [
+                                # Tabs section to choose price or quantity for the graph
                                 dcc.Tabs(
                                     children=[
+                                        # Price tab
                                         dcc.Tab(
                                             label="Historical Price Data",
                                             value="priceTab",
                                             selected_className="fw-bold fs-5",
                                             className="fs-5",
                                         ),
+                                        # Quantity tab
                                         dcc.Tab(
                                             label="Historical Quantity Data",
                                             id="quantityTab",
@@ -209,6 +224,7 @@ app.layout = dbc.Container(
                                     value="priceTab",
                                     id="graphTabs",
                                 ),
+                                # Display the graph (whatever is selected + price/quantity)
                                 dcc.Graph(id="graph", className="border-3"),
                             ],
                             className="mt-1",
@@ -219,6 +235,7 @@ app.layout = dbc.Container(
                 ),
             ]
         ),
+        # Popup notification that comes up when attempting to remove a cologne
         dbc.Modal(
             [
                 # Title
@@ -228,12 +245,14 @@ app.layout = dbc.Container(
                 # Lower Portion
                 dbc.ModalFooter(
                     [
+                        # Button to keep cologne (close modal)
                         dbc.Button(
                             "Keep Cologne",
                             id="keepColognePopup",
                             className="w-auto",
                             color="success",
                         ),
+                        # Button to remove cologne (stop tracking cologne, then close modal)
                         dbc.Button(
                             "Remove Cologne",
                             id="removeColognePopup",
@@ -256,9 +275,8 @@ app.layout = dbc.Container(
 # ------------------------------CALLBACK FUNCTIONS------------------------#
 
 
-# RadioItems - Change graph - Callback
+# Update everything (description and graphs) when a different cologne is pressed from the side bar
 @callback(
-    # Graph
     Output("graph", "figure"),
     # Description Stuff
     Output("description", "children"),
@@ -271,11 +289,10 @@ app.layout = dbc.Container(
     Input("graphChoices", "value"),
     Input("graphTabs", "value"),
 )
-def updateGraphDropDown(value, tab):
-    # Get Dataframes (Price date & Quantity Date)
-
+def viewNewCologne(selectedCologneName, tab):
+    # Update the graph, depending on which tab was selected
     if tab == "priceTab":
-        df = Database.getPriceDateDF(value)
+        df = Database.getPriceDateDF(selectedCologneName)
         graphFigure = px.line(
             df,
             x="DateScraped",
@@ -286,7 +303,7 @@ def updateGraphDropDown(value, tab):
         )
 
     else:
-        df = Database.getQuantityDateDF(value)
+        df = Database.getQuantityDateDF(selectedCologneName)
         graphFigure = px.line(
             df,
             x="DateScraped",
@@ -296,15 +313,16 @@ def updateGraphDropDown(value, tab):
             range_y=[-0.5, None],
         )
 
-    # Necessary items for product description
-    url = Database.getURL(value)
+    # Get all necessary data for the description section
+    url = Database.getURL(selectedCologneName)
 
-    # Info Cards
+    # Get all necessary data for the description section
     livePrice, liveQuantity, offSalePrice, description, img = Webscraper.scrapeLiveData(
-        url
+        fragBuyURL=url
     )
 
-    # Custom Price Cards (On Sale & Not On Sale)
+    # Live price cards
+    # Not on sale
     if offSalePrice is None:
         priceCard = dbc.CardBody(
             [
@@ -355,6 +373,7 @@ def updateGraphDropDown(value, tab):
             ],
             className="border-start border-danger border-5",
         )
+    # Is on sale
     else:
         priceCard = dbc.CardBody(
             [
@@ -406,6 +425,7 @@ def updateGraphDropDown(value, tab):
             className="border-start border-success border-5",
         )
 
+    # Live quantity cards
     # Sold out
     if liveQuantity == 0:
         quantityCard = dbc.CardBody(
@@ -556,10 +576,18 @@ def updateGraphDropDown(value, tab):
             className="border-start border-success border-5",
         )
 
-    return (graphFigure, description, img, value, url, priceCard, quantityCard)
+    return (
+        graphFigure,
+        description,
+        img,
+        selectedCologneName,
+        url,
+        priceCard,
+        quantityCard,
+    )
 
 
-# BUTTON - Add Cologne - Callback
+# Takes url from textbox, and when button is pressed, attempts to start tracking that product
 @callback(
     Output("addCologneMessage", "children", allow_duplicate=True),
     Output("graphChoices", "options", allow_duplicate=True),
@@ -578,7 +606,10 @@ def updateGraphDropDown(value, tab):
 )
 def addCologne(clicks, url):
     with open("fragranceBuy-Sites.txt", "a+") as file:
+        # See if we can even access that url
         isValid = Helpers.urlValidifier(url)
+
+        # Go to top of file so we can read everything
         file.seek(0)
 
         newtables = Database.getTables()
@@ -597,14 +628,21 @@ def addCologne(clicks, url):
         else:
             file.write("\n" + url)
             file.flush()
-            Webscraper.scrapeOne(url)
+
+            # Scrape the newly added link, so we have a starting datapoint for it
+            Webscraper.scrapeOne(fragBuyURL=url)
+            # Get all the tables that are being tracked (now that a new one has been added)
             newtables = Database.getTables()
 
+            # Get all the information we need to update the page to view the newly added cologne (indexed at the last element, since its ordered by add-by date)
             graphFigure, description, img, value, url2, priceCard, quantityCard = (
-                updateGraphDropDown(newtables[len(newtables) - 1], "priceTab")
+                viewNewCologne(newtables[len(newtables) - 1], "priceTab")
             )
 
+            # Sort side list alphabetically
             newtables.sort()
+
+            # Update everything
             return (
                 ("VALID: URL added to tracked products..."),
                 newtables,
@@ -618,6 +656,7 @@ def addCologne(clicks, url):
             )
 
 
+# Popup that is shown when trying to remove a cologne
 @callback(
     Output("confirmRemove", "is_open", allow_duplicate=True),
     Output("areYouSureMessage", "children"),
@@ -629,6 +668,7 @@ def toggleRemovePopup(clicks, value):
     return (True, f"Are you sure you want to stop tracking: {value}?")
 
 
+# Popup closed when user chooses to keep the cologne
 @callback(
     Output("confirmRemove", "is_open", allow_duplicate=True),
     Input("keepColognePopup", "n_clicks"),
@@ -638,6 +678,7 @@ def keepsCologne(clicks):
     return False
 
 
+# Cologne is removed from .txt file and from database if user chooses to remove the cologne
 @callback(
     Output("confirmRemove", "is_open", allow_duplicate=True),
     Output("graphChoices", "options"),
@@ -655,29 +696,30 @@ def keepsCologne(clicks):
     State("graphChoices", "value"),
     prevent_initial_call=True,
 )
-def deleteCologne(clicks, value):
+def deleteCologne(clicks, selectedCologneTitle):
 
-    # Remove new tables from the file
-    url = Database.getURL(value)
+    url = Database.getURL(selectedCologneTitle)
 
     with open("fragranceBuy-Sites.txt", "r") as file:
         lines = file.readlines()
 
     with open("fragranceBuy-Sites.txt", "w") as file:
+        # Iterate through all the lines and remove the line that matches the desired colognes URL
         for line in lines:
             if not (line.strip() == url):
                 file.write(line)
 
-    # Remove Table "Value" from Database
-    Database.removeTable(value)
+    # Remove that cologne from database
+    Database.removeTable(selectedCologneTitle)
 
     # Get new tables
     tables = Database.getTables()
     graphFigure, description, img, value2, url2, priceCard, quantityCard = (
-        updateGraphDropDown(tables[len(tables) - 1], "priceTab")
+        viewNewCologne(tables[len(tables) - 1], "priceTab")
     )
     tables.sort()
 
+    # Update everything, defaulting to last added cologne in database
     return (
         False,
         tables,
@@ -691,7 +733,7 @@ def deleteCologne(clicks, value):
     )
 
 
-# Search cologne
+# Search bar implementation
 @callback(
     Output("graphChoices", "options", allow_duplicate=True),
     Input("graphChoicesSearchBar", "value"),
@@ -705,11 +747,15 @@ def searchCologne(search):
         newChoices = tables
     else:
         for table in tables:
+            # If the searched thing is in the name of any cologne we are tracking, then show those tables
             if str(search).lower() in str(table).lower():
                 newChoices.append(table)
 
+    # Send these new choices to update the side bar
     return newChoices
 
+
+# ------------------- RUNNING THE PROGRAM -------------------#
 
 if __name__ == "__main__":
     app.run(debug=True)
