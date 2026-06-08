@@ -82,7 +82,6 @@ def scrapeOne(fragBuyURL, scraper=scraper):
     # Scrape all of the data required
     title = str(location["title"])
     current_price = float(location["price"])
-    offsalePrice = location["compare_at_price"]
     quantity = int(location["inventory_quantity"])
 
     # Add those data points to the table of the specific cologne

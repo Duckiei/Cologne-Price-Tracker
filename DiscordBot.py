@@ -151,26 +151,20 @@ async def notifyquantitydecreases(ctx):
 # Start tracking product w the provided link (multiple links can be entered with one call, using spaces to seperate links)
 @bot.command()
 async def add(ctx, *, urls):
-    if ctx.author.id == 578669410378711066:
-        if " " in str(urls):
-            toTrack = str(urls).split(" ")
+    toTrack = urls.split(" ")
 
-            with open("fragranceBuy-Sites.txt", "a") as file:
-                for cologne in toTrack:
-                    file.write("\n" + cologne)
-                    Webscraper.scrapeOne(cologne)
+    with open("fragranceBuy-Sites.txt", "a") as file:
+        for cologne in toTrack:
+            file.write("\n" + cologne)
+            Webscraper.scrapeOne(cologne)
 
-            await ctx.channel.send("Scraped multiple Links")
-
-        else:
-            with open("fragranceBuy-Sites.txt", "a") as file:
-                file.write("\n" + urls)
-                Webscraper.scrapeOne(urls)
-
-            await ctx.channel.send("Scraped Single Link")
-
+    if len(toTrack) > 1:
+        await ctx.channel.send("Added multiple products to database:")
     else:
-        ctx.channel.send("You do not have proper permissions to add colognes")
+        await ctx.channel.send("Added one product to database:")
+
+    for cologne in toTrack:
+        await ctx.channel.send(f"+ {cologne}")
 
 
 # Small summary card of all live information for specified cologne (top right part of DASH interface basically)
@@ -186,7 +180,7 @@ async def status(ctx, *, productTitle):
         return
 
     current_price, current_quantity, regular_price, description, img = (
-        Webscraper.scrapeLiveData(url=url)
+        Webscraper.scrapeLiveData(url)
     )
 
     # Create embed
