@@ -60,7 +60,7 @@ def priceDecrease(title, newPrice, oldPrice, imgLink, productLink):
     embed.add_field(name="Was:", value=(f"~~**${oldPrice}**~~"), inline=True)
     embed.add_field(name="Now:", value=(f"**${newPrice}**"), inline=True)
     embed.add_field(
-        name="Increase:", value=f"**-${abs(newPrice-oldPrice)}**", inline=True
+        name="Decrease:", value=f"**-${abs(newPrice-oldPrice)}**", inline=True
     )
     embed.set_thumbnail(url=imgLink)
     embed.set_footer(text="Cologne Tracker • Shayaan Shahid")

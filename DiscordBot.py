@@ -4,6 +4,7 @@ from discord.ext import commands
 import Database
 import Webscraper
 import json
+import os
 
 # ------------------- INITIALIZATION VARIABLES -------------------#
 intents = discord.Intents.default()
@@ -30,18 +31,33 @@ async def on_ready():
 
 # Provides a .txt file in discord channel for user to see all tracked products
 @bot.command()
-async def tables(ctx):
+async def tables(ctx, *, searchKeyword=None):
     tables = Database.getTables()
     tables.sort()
 
     with open("tables.txt", "w") as names:
-        for table in tables:
-            names.write(table + "\n")
+        if searchKeyword is None:
+            for table in tables:
+                names.write(table + "\n")
+        else:
+            for table in tables:
+                if searchKeyword.lower() in table.lower():
+                    names.write(table + "\n")
 
-    await ctx.channel.send(
-        content="Current tables in the database:",
-        file=discord.File("tables.txt"),
-    )
+    if os.path.getsize("tables.txt") == 0:
+        await ctx.channel.send(
+            f"""No fragrances being tracked contain the keyword "{searchKeyword}" """
+        )
+    elif searchKeyword is None:
+        await ctx.channel.send(
+            content="Here are all of the fragrances being tracked: ",
+            file=discord.File("tables.txt"),
+        )
+    else:
+        await ctx.channel.send(
+            content=f"""Here are all of the fragrances currently being tracked, containing "{searchKeyword}":""",
+            file=discord.File("tables.txt"),
+        )
 
 
 # Make user be notified when ANY product increases in price

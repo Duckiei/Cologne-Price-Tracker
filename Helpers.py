@@ -1,3 +1,5 @@
+# Small methods which are used almost everywhere in this project
+
 import cloudscraper
 
 scraper = cloudscraper.create_scraper()
