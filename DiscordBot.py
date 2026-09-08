@@ -5,6 +5,7 @@ import Database
 import Webscraper
 import json
 import os
+from tokens import BOTID
 
 # ------------------- INITIALIZATION VARIABLES -------------------#
 intents = discord.Intents.default()
@@ -275,4 +276,4 @@ async def tracking(ctx):
             await ctx.channel.send(f"→ {role.name}")
 
 
-bot.run("MTUxMTQ2NDk4NzU0Mzk5NDU0MA.G2I2Lf.tcCX1k5WoCcoF5IonylV9Byk3AwJht8j1Q-J24")
+bot.run(BOTID)

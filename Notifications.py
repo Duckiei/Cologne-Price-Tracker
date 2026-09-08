@@ -1,10 +1,11 @@
 # ------------------- IMPORT STATEMENTS -------------------#
 import json
 from discord import Webhook, SyncWebhook, File, Colour, Embed
+from tokens import WEBHOOK
 
 # ------------------- INITIALIZATION VARIABLES -------------------#
 
-webhookLink = "https://discordapp.com/api/webhooks/1511854262362177739/D0iLIpCnjIU01NpY_QDnvwbLHPlcTCtp7MIhTKBY3YZ0M0-3a5g1jUCJjWdNH77GjekA"
+webhookLink = WEBHOOK
 webhook = SyncWebhook.from_url(webhookLink)
 
 botUsername = "cologne-bot"
